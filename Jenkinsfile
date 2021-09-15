@@ -10,20 +10,9 @@ pipeline {
                 sh 'mvn clean package -B -ntp -DskipTests -Dcheckstyle.skip'
             }
         }
-        stage('Deploy Artifactory') {
+        stage('Archive artifacts') {
             steps {
-                script {
-                    def releases = 'pet-clinic-war-release'
-                    def snapshots = 'pet-clinic-war-snapshot'
-                    def server = Artifactory.server 'artifactory'
-                    def rtMaven = Artifactory.newMavenBuild()
-                    
-                    env.MAVEN_HOME = '/usr/share/maven'
-                    
-                    rtMaven.deployer server: server, releaseRepo: releases, snapshotRepo: snapshots
-                    def buildInfo = rtMaven.run pom: 'pom.xml', goals: 'clean install -B -ntp -DskipTests'
-                    server.publishBuildInfo buildInfo
-                }
+                archiveArtifacts 'target/*.jar'
             }
         }
     }
